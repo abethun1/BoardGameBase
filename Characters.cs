@@ -12,6 +12,11 @@ public abstract class Characters : MonoBehaviour {
     public Rigidbody rigidBody;
     public CapsuleCollider capsuleCollider;
 
+    public bool walking { set; get; }
+    public bool running { set; get; }
+    public bool turning;
+    private bool isMoving;
+
 
     static Quaternion playerOrientation = Quaternion.Euler(0, 0, 0);
     static Quaternion enemyOreintation = Quaternion.Euler(0, 180, 0);
@@ -24,7 +29,7 @@ public abstract class Characters : MonoBehaviour {
 
         capsuleCollider.enabled = false;
     }
-/*
+
     private void FixedUpdate()
     {
         if (getIsMoving())
@@ -35,21 +40,21 @@ public abstract class Characters : MonoBehaviour {
                 animatorController.SetBool("Run", true);
             Vector3 movement = BoardManager.Instance.getMovingDirection();
             Quaternion targetRotation = Quaternion.LookRotation(movement, Vector3.up);
-            Quaternion newRotation = Quaternion.Lerp(rigidBody.rotation, targetRotation, 3 * Time.deltaTime);
+            Quaternion newRotation = Quaternion.Lerp(rigidBody.rotation, targetRotation, 10 * Time.deltaTime);
             rigidBody.MoveRotation(newRotation);
         }
         else if (!turning)
         {
-            if (isWhite)
-                rigidBody.MoveRotation(whiteOrientation);
+            if (isPlayer)
+                rigidBody.MoveRotation(playerOrientation);
             else
-                rigidBody.MoveRotation(blackOrientation);
+                rigidBody.MoveRotation(enemyOreintation);
 
             animatorController.SetBool("Walk", false);
             animatorController.SetBool("Run", false);
         }
     }
-  */
+
     public void SetPosition(int x, int y)
     {
         Debug.Log(animatorController);
@@ -61,4 +66,21 @@ public abstract class Characters : MonoBehaviour {
     {
         return new bool[BoardManager.Instance.getBoardSizeX(), BoardManager.Instance.getBoardSizeY()];
     }
+
+    private void setIsMoving(bool m)
+    {
+        isMoving = m;
+    }
+
+    public bool getIsMoving()
+    {
+        return isMoving;
+    }
+    public void movement(bool m, bool w, bool r)
+    {
+        setIsMoving(m);
+        walking = w;
+        running = r;
+    }
+
 }

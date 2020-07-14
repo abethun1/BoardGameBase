@@ -29,6 +29,14 @@ public class BoardManager : MonoBehaviour
     public int boardSizeX;
     public int boardSizeY;
 
+    //Character Directions for movement
+    private bool movingUp;
+    private bool movingDown;
+    private bool movingLeft;
+    private bool movingRight;
+    private Vector3 movingDirection;
+    private Vector3 turningDirection;
+
 
     private void Start()
     {
@@ -41,18 +49,116 @@ public class BoardManager : MonoBehaviour
         UpdateSelection();
         DrawChessBoard();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !movingUp && !movingDown && !movingLeft && !movingRight)
         {
-            if(selectionX >= 0 && selectionY >= 0)
+            if (selectionX >= 0 && selectionY >= 0)
             {
-                if(selectedCharacter == null)
+                if (selectedCharacter == null)
                 {
+                    //Select Chess Piece
                     SelectCharacter(selectionX, selectionY);
                 }
                 else
                 {
-                    MoveCharacter(selectionX, selectionY);
+                    //move piece
+                    startMoveChessPiece(selectionX, selectionY);
                 }
+            }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (movingLeft || movingRight || movingUp || movingDown)
+        {
+            print("entered here");
+
+            float tempPosX = selectedCharacter.transform.position.x;
+            float tempPosY = selectedCharacter.transform.position.z;
+            float tempSelectionX = (float)selectionX + .5f;
+            float tempSelectionY = (float)selectionY + .5f;
+
+            Vector3 newPosition = new Vector3(selectedCharacter.transform.position.x, selectedCharacter.transform.position.y, selectedCharacter.transform.position.z);
+            Vector3 newDirection = new Vector3(0, 0, 0);
+
+            if (movingLeft)
+            {
+                if (tempPosX > tempSelectionX)
+                {
+                    newPosition.x = newPosition.x - 1;
+                    newDirection.x = -1;
+                }
+                else
+                {
+                    newPosition.x = newPosition.x + 1;
+                    newDirection.x = 0;
+                    movingLeft = false;
+                }
+
+            }
+
+            if (movingRight)
+            {
+                if (tempPosX < tempSelectionX)
+                {
+                    newPosition.x = newPosition.x + 1;
+                    newDirection.x = 1;
+                }
+                else
+                {
+                    newPosition.x = newPosition.x - 1;
+                    newDirection.x = 0;
+                    movingRight = false;
+                }
+
+            }
+
+            if (movingUp)
+            {
+                if (tempPosY < tempSelectionY)
+                {
+                    newPosition.z = newPosition.z + 1;
+                    newDirection.z = 1;
+                }
+                else
+                {
+                    newPosition.z = newPosition.z - 1;
+                    newDirection.z = 0;
+                    movingUp = false;
+                }
+            }
+
+            if (movingDown)
+            {
+                if (tempPosY > tempSelectionY)
+                {
+                    newPosition.z = newPosition.z - 1;
+                    newDirection.z = -1;
+                }
+                else
+                {
+                    newPosition.z = newPosition.z + 1;
+                    newDirection.z = 0;
+                    movingDown = false;
+                }
+            }
+
+            setMovingDirection(newDirection);
+            if (Mathf.Abs(tempSelectionX - tempPosX) > 2 || Mathf.Abs(tempSelectionY - tempPosY) > 2)
+            {
+                selectedCharacter.GetComponent<Characters>().movement(true, false, true);
+                selectedCharacter.transform.position = Vector3.Lerp(selectedCharacter.transform.position, newPosition, 1.5f * Time.deltaTime);
+            }
+            else
+            {
+                selectedCharacter.GetComponent<Characters>().movement(true, true, false);
+                selectedCharacter.transform.position = Vector3.Lerp(selectedCharacter.transform.position, newPosition, 1f * Time.deltaTime);
+            }
+
+            if (movingLeft == false && movingRight == false && movingUp == false && movingDown == false)
+            {
+                selectedCharacter.GetComponent<Characters>().movement(false, false, false);
+                MoveCharacter(selectionX, selectionY);
             }
         }
     }
@@ -130,10 +236,10 @@ public class BoardManager : MonoBehaviour
         SpawnCharacters(0, 5, 0, true);
 
         //Spawn Enemy Team
-        SpawnCharacters(11, 2, 7, false);
-        SpawnCharacters(11, 3, 7, false);
-        SpawnCharacters(11, 4, 7, false);
-        SpawnCharacters(11, 5, 7, false);
+        SpawnCharacters(1, 2, 7, false);
+        SpawnCharacters(1, 3, 7, false);
+        SpawnCharacters(1, 4, 7, false);
+        SpawnCharacters(1, 5, 7, false);
     }
     private Vector3 GetTileCenter(int x, int y)
     {
@@ -173,6 +279,51 @@ public class BoardManager : MonoBehaviour
         }
         BoardHighlights.Instance.HideHighlights();
         selectedCharacter = null;
+    }
+
+    public void startMoveChessPiece(int x, int y)
+    {
+        //Don't attack the piece just move
+        if (allowedMoves[x, y] && getCharacter(x, y) == null)
+        {
+            //Move Left
+            movingLeft = true;
+
+            //Move Right
+            movingRight = true;
+
+            //Move Up
+            movingUp = true;
+
+            //Move Down
+            movingDown = true;
+        }
+
+        //Attack and Move
+
+        //Don't move the piece just attack
+
+        else
+        {
+            BoardHighlights.Instance.HideHighlights();
+            selectedCharacter = null;
+        }
+    }
+
+    public Vector3 getMovingDirection()
+    {
+        return movingDirection;
+    }
+
+    private void setMovingDirection(Vector3 d)
+    {
+        movingDirection = d;
+    }
+
+    public Characters getCharacter(int x, int y)
+    {
+        Characters c = Characters[x, y];
+        return c;
     }
 
     public int getBoardSizeX()
