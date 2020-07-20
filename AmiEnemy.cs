@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class AmiEnemy : Characters {
 
-	// Use this for initialization
-	void Start () {
+    public override void Start()
+    {
+        base.Start();
         isPlayer = false;
-	}
-
+    }
     public override bool[,] PossibleMove()
     {
 
-        bool[,] r = new bool[BoardManager.Instance.getBoardSizeX(), BoardManager.Instance.getBoardSizeY()];
+        bool[,] r = new bool[8, 8];
         Characters c, c2;
 
 
@@ -98,11 +98,5 @@ public class AmiEnemy : Characters {
             }
         }
         return r;
-    }
-
-    public void EnemyMove()
-    {
-
-
     }
 }

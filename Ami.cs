@@ -7,7 +7,7 @@ public class Ami : Characters {
     public override void Start()
     {
         base.Start();
-        isPlayer = true;
+      //  isPlayer = true;
     }
     public override bool[,] PossibleMove()
     {

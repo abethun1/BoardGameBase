@@ -57,7 +57,6 @@ public abstract class Characters : MonoBehaviour {
 
     public void SetPosition(int x, int y)
     {
-        Debug.Log(animatorController);
         CurrentX = x;
         CurrentY = y;
     }
